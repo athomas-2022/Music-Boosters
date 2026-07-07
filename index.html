@@ -1,0 +1,448 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="light">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Fundraising Spending Dashboard — Sheet3</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fira+Code:wght@400;500;600&family=Fira+Sans:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --color-primary:#1E40AF; --color-on-primary:#FFFFFF; --color-secondary:#3B82F6;
+    --color-accent:#B45309; --color-accent-soft:#FEF3C7;
+    --color-bg:#F1F5F9; --color-surface:#FFFFFF; --color-surface-2:#F8FAFC;
+    --color-fg:#0F172A; --color-fg-muted:#475569; --color-fg-subtle:#64748B;
+    --color-border:#E2E8F0; --color-border-strong:#CBD5E1;
+    --color-destructive:#DC2626; --color-success:#15803D;
+    --color-ring:#1E40AF;
+    --cat-1:#1E40AF; --cat-2:#0891B2; --cat-3:#7C3AED; --cat-4:#B45309; --cat-5:#475569;
+    --shadow-sm:0 1px 2px rgba(15,23,42,.06),0 1px 3px rgba(15,23,42,.08);
+    --shadow-md:0 4px 12px rgba(15,23,42,.08),0 2px 4px rgba(15,23,42,.04);
+    --radius:12px; --radius-sm:8px;
+    --sans:'Fira Sans',system-ui,-apple-system,Segoe UI,Roboto,sans-serif;
+    --mono:'Fira Code',ui-monospace,SFMono-Regular,Menlo,monospace;
+  }
+  html[data-theme="dark"]{
+    --color-bg:#0B1220; --color-surface:#111C31; --color-surface-2:#0E1728;
+    --color-fg:#E9EEF6; --color-fg-muted:#A9B7CC; --color-fg-subtle:#7E8DA5;
+    --color-border:#22304B; --color-border-strong:#33405C;
+    --color-accent:#FBBF24; --color-accent-soft:#3A2E10;
+    --color-secondary:#60A5FA; --color-success:#4ADE80; --color-destructive:#F87171;
+    --cat-1:#60A5FA; --cat-2:#22D3EE; --cat-3:#A78BFA; --cat-4:#FBBF24; --cat-5:#94A3B8;
+    --shadow-sm:0 1px 2px rgba(0,0,0,.4); --shadow-md:0 6px 18px rgba(0,0,0,.45);
+  }
+  *{box-sizing:border-box}
+  html,body{margin:0;padding:0}
+  body{
+    font-family:var(--sans); background:var(--color-bg); color:var(--color-fg);
+    line-height:1.5; -webkit-font-smoothing:antialiased; min-height:100vh;
+  }
+  .num{font-family:var(--mono); font-variant-numeric:tabular-nums; font-feature-settings:"tnum"}
+  a{color:var(--color-secondary)}
+  svg{display:block}
+  ::selection{background:var(--color-secondary);color:#fff}
+
+  header.app{position:sticky; top:0; z-index:40; background:var(--color-surface); border-bottom:1px solid var(--color-border); box-shadow:var(--shadow-sm);}
+  .header-inner{max-width:1400px; margin:0 auto; padding:14px 24px; display:flex; align-items:center; gap:16px; flex-wrap:wrap;}
+  .brand{display:flex; align-items:center; gap:12px; min-width:0}
+  .logo{width:40px;height:40px;border-radius:10px;flex-shrink:0;background:linear-gradient(135deg,var(--color-primary),var(--color-secondary));display:grid;place-items:center;color:#fff;box-shadow:var(--shadow-sm);}
+  .brand h1{font-size:18px;font-weight:700;margin:0;letter-spacing:-.01em;line-height:1.15}
+  .brand p{margin:0;font-size:12.5px;color:var(--color-fg-subtle)}
+  .tab-pill{font-size:11px;font-weight:600;color:var(--color-primary);background:#EFF4FF;border:1px solid #DBEAFE;padding:2px 8px;border-radius:999px;margin-left:8px;letter-spacing:.02em}
+  html[data-theme="dark"] .tab-pill{background:rgba(96,165,250,.12);border-color:#22304B;color:var(--color-secondary)}
+  .header-spacer{flex:1}
+  .icon-btn{display:inline-grid;place-items:center;width:40px;height:40px;border-radius:10px;background:var(--color-surface-2);border:1px solid var(--color-border);color:var(--color-fg-muted);cursor:pointer;transition:background .18s,color .18s,border-color .18s;}
+  .icon-btn:hover{background:var(--color-bg);color:var(--color-fg)}
+  .icon-btn:focus-visible{outline:3px solid var(--color-ring);outline-offset:2px}
+
+  main{max-width:1400px;margin:0 auto;padding:24px}
+
+  .kpi-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:16px;margin-bottom:20px}
+  .kpi{background:var(--color-surface);border:1px solid var(--color-border);border-radius:var(--radius);padding:18px 18px 16px;box-shadow:var(--shadow-sm);position:relative;overflow:hidden;}
+  .kpi::before{content:"";position:absolute;left:0;top:0;bottom:0;width:4px;background:var(--accent,var(--color-primary))}
+  .kpi .lbl{font-size:11.5px;font-weight:600;letter-spacing:.06em;text-transform:uppercase;color:var(--color-fg-subtle);display:flex;align-items:center;gap:7px}
+  .kpi .val{font-size:29px;font-weight:700;margin-top:8px;letter-spacing:-.02em;line-height:1}
+  .kpi .sub{font-size:12.5px;color:var(--color-fg-muted);margin-top:6px}
+
+  .panel{background:var(--color-surface);border:1px solid var(--color-border);border-radius:var(--radius);box-shadow:var(--shadow-sm);}
+  .panel-head{padding:16px 20px;border-bottom:1px solid var(--color-border);display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap}
+  .panel-head h2{margin:0;font-size:15px;font-weight:600;display:flex;align-items:center;gap:9px}
+  .panel-head .hint{font-size:12px;color:var(--color-fg-subtle)}
+
+  .cols{display:grid;grid-template-columns:1.35fr 1fr;gap:16px;margin-bottom:20px}
+
+  .bars{padding:18px 20px;display:flex;flex-direction:column;gap:14px}
+  .bar-row{display:grid;grid-template-columns:150px 1fr auto;align-items:center;gap:12px}
+  .bar-row .name{font-size:13px;font-weight:500;display:flex;align-items:center;gap:8px;min-width:0}
+  .bar-row .name .dot{width:10px;height:10px;border-radius:3px;flex-shrink:0}
+  .bar-row .name span{overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+  .track{height:22px;background:var(--color-surface-2);border-radius:6px;overflow:hidden;border:1px solid var(--color-border)}
+  .fill{height:100%;border-radius:6px 0 0 6px;width:0;transition:width .9s cubic-bezier(.22,1,.36,1)}
+  .bar-row .amt{font-size:13px;font-weight:600;text-align:right;min-width:78px}
+  .bar-row .amt small{display:block;font-weight:400;color:var(--color-fg-subtle);font-size:11px}
+
+  .toplist{padding:8px 20px 16px}
+  .top-item{display:flex;align-items:center;gap:12px;padding:11px 0;border-bottom:1px solid var(--color-border)}
+  .top-item:last-child{border-bottom:0}
+  .rank{flex-shrink:0;width:26px;height:26px;border-radius:8px;display:grid;place-items:center;font-family:var(--mono);font-size:12px;font-weight:600;background:var(--color-surface-2);color:var(--color-fg-muted);border:1px solid var(--color-border)}
+  .top-item:nth-child(1) .rank{background:var(--color-primary);color:#fff;border-color:var(--color-primary)}
+  .top-body{flex:1;min-width:0}
+  .top-body h4{margin:0;font-size:13.5px;font-weight:500;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+  .top-body .meta{font-size:11.5px;color:var(--color-fg-subtle);display:flex;align-items:center;gap:6px;margin-top:1px}
+  .top-body .meta .dot{width:8px;height:8px;border-radius:2px}
+  .top-amt{font-family:var(--mono);font-variant-numeric:tabular-nums;font-size:13.5px;font-weight:600;flex-shrink:0}
+
+  .tier{display:flex;align-items:flex-start;gap:12px;padding:13px 0;border-bottom:1px solid var(--color-border)}
+  .tier:last-child{border-bottom:0}
+  .tier-badge{flex-shrink:0;width:30px;height:30px;border-radius:9px;display:grid;place-items:center;font-family:var(--mono);font-size:13px;font-weight:700;color:#fff}
+  .tier-body{flex:1;min-width:0}
+  .tier-body h4{margin:0;font-size:14px;font-weight:600;display:flex;align-items:center;gap:8px;flex-wrap:wrap}
+  .tier-body h4 .pct{font-family:var(--mono);font-size:11px;font-weight:600;color:var(--color-fg-subtle);background:var(--color-surface-2);border:1px solid var(--color-border);padding:1px 6px;border-radius:5px}
+  .tier-body .desc{font-size:12px;color:var(--color-fg-subtle);margin-top:2px}
+  .tier-body .cum{font-size:11.5px;color:var(--color-fg-subtle);margin-top:5px;font-family:var(--mono)}
+  .tier-body .cum b{color:var(--color-fg-muted);font-weight:600}
+  .tier-amt{text-align:right;flex-shrink:0}
+  .tier-amt .a{font-family:var(--mono);font-variant-numeric:tabular-nums;font-size:15px;font-weight:700}
+  .tier-amt .n{font-size:11px;color:var(--color-fg-subtle)}
+
+  .prio-tag{display:inline-flex;align-items:center;gap:4px;font-size:10px;font-weight:700;padding:2px 7px;border-radius:5px;color:#fff;vertical-align:middle;margin-left:8px;letter-spacing:.02em}
+
+  .toolbar{display:flex;gap:12px;align-items:center;flex-wrap:wrap;padding:14px 20px;border-bottom:1px solid var(--color-border)}
+  .search{position:relative;flex:1;min-width:200px}
+  .search svg{position:absolute;left:12px;top:50%;transform:translateY(-50%);color:var(--color-fg-subtle)}
+  .search input{width:100%;padding:10px 12px 10px 38px;border:1px solid var(--color-border-strong);border-radius:var(--radius-sm);background:var(--color-surface-2);color:var(--color-fg);font-family:var(--sans);font-size:14px;}
+  .search input:focus{outline:3px solid var(--color-ring);outline-offset:1px;border-color:var(--color-primary)}
+  .chips{display:flex;gap:8px;flex-wrap:wrap}
+  .chip{padding:8px 13px;border-radius:999px;border:1px solid var(--color-border-strong);background:var(--color-surface-2);color:var(--color-fg-muted);font-size:12.5px;font-weight:500;cursor:pointer;transition:all .16s;display:inline-flex;align-items:center;gap:7px;font-family:var(--sans);}
+  .chip .dot{width:9px;height:9px;border-radius:3px}
+  .chip:hover{border-color:var(--color-border-strong);color:var(--color-fg)}
+  .chip[aria-pressed="true"]{background:var(--color-primary);color:#fff;border-color:var(--color-primary)}
+  .chip[aria-pressed="true"] .dot{background:#fff!important}
+  .chip:focus-visible{outline:3px solid var(--color-ring);outline-offset:2px}
+
+  .table-wrap{overflow-x:auto}
+  table{width:100%;border-collapse:collapse;font-size:13.5px;min-width:680px}
+  thead th{position:sticky;top:0;background:var(--color-surface-2);text-align:left;padding:11px 16px;font-size:11.5px;font-weight:600;letter-spacing:.05em;text-transform:uppercase;color:var(--color-fg-subtle);border-bottom:1px solid var(--color-border-strong);white-space:nowrap;}
+  thead th.sortable{cursor:pointer;user-select:none}
+  thead th.sortable:hover{color:var(--color-fg)}
+  thead th .arrow{opacity:.35;font-size:10px;margin-left:4px}
+  thead th[aria-sort="ascending"] .arrow,thead th[aria-sort="descending"] .arrow{opacity:1;color:var(--color-primary)}
+  th.right,td.right{text-align:right}
+  tbody td{padding:11px 16px;border-bottom:1px solid var(--color-border);vertical-align:middle}
+  tbody tr{transition:background .12s}
+  tbody tr:hover{background:var(--color-surface-2)}
+  .item-name{font-weight:500;color:var(--color-fg)}
+  .cat-tag{display:inline-flex;align-items:center;gap:6px;font-size:11.5px;font-weight:500;padding:3px 9px;border-radius:6px;white-space:nowrap;background:var(--color-surface-2);border:1px solid var(--color-border)}
+  .cat-tag .dot{width:8px;height:8px;border-radius:2px}
+  .link-btn{display:inline-grid;place-items:center;width:30px;height:30px;border-radius:7px;color:var(--color-fg-subtle);transition:.15s;text-decoration:none}
+  .link-btn:hover{background:var(--color-surface-2);color:var(--color-secondary)}
+  .link-btn:focus-visible{outline:2px solid var(--color-ring);outline-offset:1px}
+  .qty-pill{font-family:var(--mono);font-size:12px;color:var(--color-fg-muted)}
+  tfoot td{padding:14px 16px;font-weight:700;border-top:2px solid var(--color-border-strong);background:var(--color-surface-2)}
+  .empty{padding:48px 20px;text-align:center;color:var(--color-fg-subtle)}
+  .count-note{font-size:12px;color:var(--color-fg-subtle);padding:10px 20px;border-top:1px solid var(--color-border)}
+
+  .wishlist{margin-top:20px}
+  .wishlist ul{list-style:none;margin:0;padding:14px 20px;display:grid;grid-template-columns:repeat(auto-fill,minmax(240px,1fr));gap:10px}
+  .wishlist li{display:flex;align-items:center;gap:9px;font-size:13.5px;color:var(--color-fg-muted);padding:9px 12px;background:var(--color-surface-2);border:1px dashed var(--color-border-strong);border-radius:8px}
+
+  footer.app{max-width:1400px;margin:0 auto;padding:20px 24px 40px;color:var(--color-fg-subtle);font-size:12px;text-align:center}
+
+  @media (max-width:960px){.kpi-grid{grid-template-columns:repeat(2,1fr)}.cols{grid-template-columns:1fr}}
+  @media (max-width:560px){
+    main{padding:16px}.header-inner{padding:12px 16px}.kpi-grid{grid-template-columns:1fr}.kpi .val{font-size:25px}
+    .bar-row{grid-template-columns:110px 1fr}
+    .bar-row .amt{grid-column:1/-1;text-align:left;display:flex;gap:8px;align-items:baseline}
+    .bar-row .amt small{display:inline}
+  }
+  @media (prefers-reduced-motion:reduce){*{transition:none!important;animation:none!important}.fill{transition:none!important}}
+</style>
+</head>
+<body>
+<header class="app">
+  <div class="header-inner">
+    <div class="brand">
+      <div class="logo" aria-hidden="true">
+        <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 3v18h18"/><rect x="7" y="12" width="3" height="6"/><rect x="12" y="8" width="3" height="10"/><rect x="17" y="5" width="3" height="13"/></svg>
+      </div>
+      <div>
+        <h1>Fundraising Campaign — Potential Spending<span class="tab-pill">Sheet3</span></h1>
+        <p>Band upgrades, tech &amp; room display purchases</p>
+      </div>
+    </div>
+    <div class="header-spacer"></div>
+    <button class="icon-btn" id="themeToggle" aria-label="Toggle dark mode" title="Toggle dark mode">
+      <svg class="ico-sun" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M4.9 4.9l1.4 1.4M17.7 17.7l1.4 1.4M2 12h2M20 12h2M4.9 19.1l1.4-1.4M17.7 6.3l1.4-1.4"/></svg>
+      <svg class="ico-moon" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="display:none"><path d="M21 12.8A9 9 0 1 1 11.2 3a7 7 0 0 0 9.8 9.8z"/></svg>
+    </button>
+  </div>
+</header>
+
+<main>
+  <section class="kpi-grid" aria-label="Budget summary">
+    <div class="kpi" style="--accent:var(--color-primary)">
+      <div class="lbl"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 1v22M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/></svg>Total Spending</div>
+      <div class="val num" id="kpiTotal">$0</div>
+      <div class="sub" id="kpiTotalSub"></div>
+    </div>
+    <div class="kpi" style="--accent:var(--color-secondary)">
+      <div class="lbl"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/></svg>Line Items</div>
+      <div class="val num" id="kpiItems">0</div>
+      <div class="sub" id="kpiItemsSub"></div>
+    </div>
+    <div class="kpi" style="--accent:var(--cat-3)">
+      <div class="lbl"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M20.6 12.5A9 9 0 1 1 11.5 3.4"/><path d="M22 12A10 10 0 0 0 12 2v10z"/></svg>Largest Category</div>
+      <div class="val num" id="kpiTopCat" style="font-size:22px">—</div>
+      <div class="sub" id="kpiTopCatSub"></div>
+    </div>
+    <div class="kpi" style="--accent:var(--color-accent)">
+      <div class="lbl"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 9l6-6 6 6M12 3v13M5 21h14"/></svg>Biggest Purchase</div>
+      <div class="val num" id="kpiBig" style="font-size:22px">—</div>
+      <div class="sub" id="kpiBigSub"></div>
+    </div>
+  </section>
+
+  <section class="cols">
+    <div class="panel">
+      <div class="panel-head">
+        <h2><svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 3v18h18"/><path d="M18 9l-5 5-3-3-4 4"/></svg>Spend by Category</h2>
+        <span class="hint">share of total</span>
+      </div>
+      <div class="bars" id="barChart"></div>
+    </div>
+    <div class="panel">
+      <div class="panel-head">
+        <h2><svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 3v12a4 4 0 0 0 8 0V7"/><path d="M14 7l3-3 3 3"/><path d="M3 6h6M3 10h6M3 14h4"/></svg>Purchase Priority</h2>
+        <span class="hint">recommended order</span>
+      </div>
+      <div class="toplist" id="topList"></div>
+    </div>
+  </section>
+
+  <section class="panel">
+    <div class="panel-head">
+      <h2><svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 6h18M3 12h18M3 18h18"/></svg>Line Items</h2>
+      <span class="hint" id="filterTotal"></span>
+    </div>
+    <div class="toolbar">
+      <label class="search">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.3-4.3"/></svg>
+        <input type="search" id="searchInput" placeholder="Search items or categories…" aria-label="Search items">
+      </label>
+      <div class="chips" id="catChips" role="group" aria-label="Filter by category"></div>
+    </div>
+    <div class="table-wrap">
+      <table id="itemsTable">
+        <thead>
+          <tr>
+            <th class="sortable" data-key="name" aria-sort="none">Item<span class="arrow">↕</span></th>
+            <th class="sortable" data-key="category" aria-sort="none">Category<span class="arrow">↕</span></th>
+            <th class="sortable right" data-key="cost" aria-sort="none">Unit Cost<span class="arrow">↕</span></th>
+            <th class="sortable right" data-key="qty" aria-sort="none">Qty<span class="arrow">↕</span></th>
+            <th class="sortable right" data-key="total" aria-sort="none">Total<span class="arrow">↕</span></th>
+            <th class="right">Link</th>
+          </tr>
+        </thead>
+        <tbody id="tableBody"></tbody>
+        <tfoot>
+          <tr>
+            <td colspan="4">Filtered subtotal</td>
+            <td class="right num" id="footTotal">$0</td>
+            <td></td>
+          </tr>
+        </tfoot>
+      </table>
+    </div>
+    <div class="count-note" id="countNote"></div>
+  </section>
+
+  <section class="panel wishlist">
+    <div class="panel-head">
+      <h2><svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 5v14M5 12h14"/></svg>Unpriced / To Source</h2>
+      <span class="hint">no price yet — not in totals</span>
+    </div>
+    <ul id="wishlist"></ul>
+  </section>
+</main>
+
+<footer class="app">
+  Built from the <strong>Sheet3</strong> tab of “Fundraising Campaign Potential Spending” · Figures reflect sheet values · Links point to Sweetwater / Amazon listings
+</footer>
+
+<script>
+/* ---------- Data: Sheet3 tab (gid 204169614) ---------- */
+const CATS = {
+  "Band Upgrades":{color:"var(--cat-3)"},
+  "Tech/Auditorium":{color:"var(--cat-1)"},
+  "Room AV / Displays":{color:"var(--cat-4)"},
+  "ETC / Consumables":{color:"var(--cat-2)"}
+};
+const SW="https://www.sweetwater.com/store/detail/";
+const ITEMS = [
+  ["Boss Katana 100 (Gen 3) Amp",449.99,2,"Band Upgrades",SW+"Kata100mk3--boss-katana-100-gen-3-100-watt-1-by-12-inch-combo-amplifier"],
+  ["Fishman Loudbox Artist",797.05,2,"Band Upgrades",SW+"LoudBoxArtBT--fishman-loudbox-artist-bluetooth-120-watt-1x8-inch-acoustic-combo-amp-with-tweeter-and-bluetooth"],
+  ["Roland RD-88 EX Stage Piano",1429.99,1,"Band Upgrades",SW+"RD88EX--roland-rd-88-ex-88-key-digital-stage-piano"],
+  ["Roland KC-600 Keyboard Amp",934.99,1,"Band Upgrades",SW+"KC600--roland-kc-600-200w-15-inch-keyboard-amp"],
+  ["Jazz Drum Kit (Sonor AQX)",809,1,"Band Upgrades",SW+"AQXJazzBMS--sonor-aqx-jazz-4-piece-shell-pack-black-midnight-sparkle"],
+  ["Instrument Cables (10 ft)",14.99,6,"Band Upgrades",SW+"QTR10GB--gator-backline-series-instrument-patch-cable-10-foot"],
+  ["Bass Amp (Hartke KB15)",749.99,1,"Band Upgrades",SW+"KB15--hartke-kb15-kickback-500w-1x15-inch-bass-combo"],
+  ["Rechargeable Batteries (Shure SB900C)",115,3,"Tech/Auditorium",SW+"SB900C--shure-sb900c-rechargeable-lithium-ion-battery-pack"],
+  ["Earset Microphone (Shure MX153)",285,2,"Tech/Auditorium",SW+"MX153TOT--shure-mx153t-o-omnidirectional-earset-microphone-for-shure-wireless-tan"],
+  ["98\" TV — choir &amp; band rooms",1399,2,"Room AV / Displays","https://www.amazon.com/dp/B0FHM6B1ZS"],
+  ["Mounting Bracket (for 98\" TV)",39.98,2,"Room AV / Displays","https://www.amazon.com/dp/B0D86HBMTR"],
+  ["Peasoup Hazer",4620,1,"Tech/Auditorium",""],
+  ["CO2 Canister",140,1,"Tech/Auditorium",""]
+].map(r=>({name:r[0],cost:r[1],qty:r[2],category:r[3],link:r[4],total:+(r[1]*r[2]).toFixed(2)}));
+
+const WISHLIST = [
+  "Glow Tape (ETC)",
+  "Wireless handhelds for portable rack (FTB)",
+  "Backstage area curtains",
+  "HDMI Cable"
+];
+
+/* ---------- Purchase priority ----------
+   1 = Band Upgrades (buy first) · 2 = everything else · 3 = Peasoup Hazer (buy last) */
+const PRIO_COLORS = {1:"var(--cat-3)", 2:"var(--cat-5)", 3:"var(--color-accent)"};
+const PRIO_LABEL = {1:"Priority 1", 3:"Priority 3"};
+ITEMS.forEach(i=>{ i.priority = i.category==="Band Upgrades" ? 1 : (i.name==="Peasoup Hazer" ? 3 : 2); });
+
+/* ---------- Helpers ---------- */
+const fmt = n => "$"+n.toLocaleString("en-US",{minimumFractionDigits:0,maximumFractionDigits:0});
+const fmt2 = n => "$"+n.toLocaleString("en-US",{minimumFractionDigits:2,maximumFractionDigits:2});
+const catColor = c => (CATS[c]&&CATS[c].color)||"var(--cat-5)";
+
+/* ---------- Aggregates ---------- */
+const grandTotal = ITEMS.reduce((s,i)=>s+i.total,0);
+const catTotals = {};
+ITEMS.forEach(i=>catTotals[i.category]=(catTotals[i.category]||0)+i.total);
+const catSorted = Object.entries(catTotals).sort((a,b)=>b[1]-a[1]);
+const biggest = ITEMS.slice().sort((a,b)=>b.total-a.total)[0];
+
+document.getElementById("kpiTotal").textContent = fmt2(grandTotal);
+document.getElementById("kpiTotalSub").textContent = Object.keys(catTotals).length+" categories";
+document.getElementById("kpiItems").textContent = ITEMS.length;
+document.getElementById("kpiItemsSub").textContent = ITEMS.reduce((s,i)=>s+i.qty,0)+" total units";
+document.getElementById("kpiTopCat").textContent = catSorted[0][0].split(" / ")[0];
+document.getElementById("kpiTopCatSub").textContent = fmt(catSorted[0][1])+" · "+Math.round(catSorted[0][1]/grandTotal*100)+"% of total";
+document.getElementById("kpiBig").textContent = fmt(biggest.total);
+document.getElementById("kpiBigSub").textContent = biggest.name.replace(/&amp;/g,"&");
+
+/* ---------- Bar chart ---------- */
+const maxCat = catSorted[0][1];
+document.getElementById("barChart").innerHTML = catSorted.map(([cat,val])=>{
+  const pct = Math.round(val/grandTotal*100);
+  const w = (val/maxCat*100);
+  return `<div class="bar-row">
+    <div class="name"><span class="dot" style="background:${catColor(cat)}"></span><span title="${cat}">${cat}</span></div>
+    <div class="track"><div class="fill" style="background:${catColor(cat)}" data-w="${w}"></div></div>
+    <div class="amt num">${fmt(val)}<small>${pct}% of total</small></div>
+  </div>`;
+}).join("");
+requestAnimationFrame(()=>document.querySelectorAll(".fill").forEach(f=>f.style.width=f.dataset.w+"%"));
+
+/* ---------- Purchase priority plan ---------- */
+const tierDefs = [
+  {p:1,label:"Band Upgrades",desc:"Instruments &amp; amps — buy first"},
+  {p:2,label:"Everything else",desc:"Tech, room displays &amp; consumables"},
+  {p:3,label:"Peasoup Hazer",desc:"Long-lead international order — buy last"}
+];
+let cum=0;
+document.getElementById("topList").innerHTML = tierDefs.map((t,idx)=>{
+  const its=ITEMS.filter(i=>i.priority===t.p);
+  const sum=its.reduce((s,i)=>s+i.total,0);
+  cum+=sum;
+  const pct=Math.round(sum/grandTotal*100);
+  const color=PRIO_COLORS[t.p]||"var(--cat-5)";
+  return `<div class="tier">
+    <div class="tier-badge" style="background:${color}">${idx+1}</div>
+    <div class="tier-body">
+      <h4>${t.label}<span class="pct">${pct}% · ${its.length} item${its.length!==1?"s":""}</span></h4>
+      <div class="desc">${t.desc}</div>
+      <div class="cum">Running total: <b>${fmt2(cum)}</b> / ${fmt2(grandTotal)}</div>
+    </div>
+    <div class="tier-amt"><div class="a">${fmt(sum)}</div><div class="n">this tier</div></div>
+  </div>`;
+}).join("");
+
+/* ---------- Filters + table ---------- */
+let state = {q:"",cat:"all",sortKey:"priority",sortDir:1};
+const chipsWrap = document.getElementById("catChips");
+chipsWrap.appendChild(mkChip("All items","all"));
+catSorted.forEach(([c])=>chipsWrap.appendChild(mkChip(c.split(" / ")[0],c,catColor(c))));
+
+function mkChip(label,val,color){
+  const b=document.createElement("button");
+  b.className="chip"; b.type="button"; b.dataset.cat=val;
+  b.setAttribute("aria-pressed", val==="all"?"true":"false");
+  b.innerHTML = (val==="all"?"":`<span class="dot" style="background:${color}"></span>`)+label;
+  b.addEventListener("click",()=>{
+    state.cat=val;
+    chipsWrap.querySelectorAll(".chip").forEach(c=>c.setAttribute("aria-pressed",c.dataset.cat===val?"true":"false"));
+    render();
+  });
+  return b;
+}
+
+document.getElementById("searchInput").addEventListener("input",e=>{state.q=e.target.value.toLowerCase();render();});
+
+document.querySelectorAll("th.sortable").forEach(th=>{
+  th.addEventListener("click",()=>{
+    const k=th.dataset.key;
+    if(state.sortKey===k){state.sortDir*=-1;}
+    else{state.sortKey=k;state.sortDir=(k==="name"||k==="category")?1:-1;}
+    document.querySelectorAll("th.sortable").forEach(t=>t.setAttribute("aria-sort","none"));
+    th.setAttribute("aria-sort",state.sortDir===1?"ascending":"descending");
+    render();
+  });
+});
+
+function render(){
+  let rows = ITEMS.filter(i=>{
+    const matchCat = state.cat==="all"||i.category===state.cat;
+    const plain = i.name.replace(/&amp;/g,"&").toLowerCase();
+    const matchQ = !state.q || plain.includes(state.q) || i.category.toLowerCase().includes(state.q);
+    return matchCat && matchQ;
+  });
+  const k=state.sortKey, dir=state.sortDir;
+  rows.sort((a,b)=>{
+    if(k==="priority"){ return (a.priority-b.priority)*dir || (b.total-a.total); }
+    let va=a[k], vb=b[k];
+    if(typeof va==="string"){return va.localeCompare(vb)*dir;}
+    return (va-vb)*dir;
+  });
+
+  const body=document.getElementById("tableBody");
+  if(rows.length===0){
+    body.innerHTML=`<tr><td colspan="6"><div class="empty">No items match your filters.</div></td></tr>`;
+  }else{
+    body.innerHTML = rows.map(i=>`
+      <tr>
+        <td class="item-name">${i.name}${PRIO_LABEL[i.priority]?`<span class="prio-tag" style="background:${PRIO_COLORS[i.priority]}">${PRIO_LABEL[i.priority]}</span>`:""}</td>
+        <td><span class="cat-tag"><span class="dot" style="background:${catColor(i.category)}"></span>${i.category}</span></td>
+        <td class="right num">${fmt2(i.cost)}</td>
+        <td class="right"><span class="qty-pill">×${i.qty}</span></td>
+        <td class="right num" style="font-weight:600">${fmt2(i.total)}</td>
+        <td class="right">${i.link?`<a class="link-btn" href="${i.link}" target="_blank" rel="noopener" aria-label="Open product listing" title="Open listing"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M15 3h6v6M10 14 21 3M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/></svg></a>`:`<span style="color:var(--color-fg-subtle);font-size:12px">—</span>`}</td>
+      </tr>`).join("");
+  }
+  const subtotal = rows.reduce((s,i)=>s+i.total,0);
+  document.getElementById("footTotal").textContent = fmt2(subtotal);
+  document.getElementById("countNote").textContent = `Showing ${rows.length} of ${ITEMS.length} items · subtotal ${fmt2(subtotal)}`;
+  document.getElementById("filterTotal").textContent = (state.cat==="all"&&!state.q) ? `Grand total ${fmt2(grandTotal)}` : `Subtotal ${fmt2(subtotal)}`;
+}
+render();
+
+/* ---------- Wishlist ---------- */
+document.getElementById("wishlist").innerHTML = WISHLIST.map(w=>`<li><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="var(--color-fg-subtle)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><path d="M12 8v8M8 12h8"/></svg>${w}</li>`).join("");
+
+/* ---------- Theme toggle ---------- */
+const root=document.documentElement, tBtn=document.getElementById("themeToggle");
+const sun=tBtn.querySelector(".ico-sun"), moon=tBtn.querySelector(".ico-moon");
+function applyTheme(t){root.setAttribute("data-theme",t);sun.style.display=t==="dark"?"none":"block";moon.style.display=t==="dark"?"block":"none";}
+try{const saved=localStorage.getItem("budget-theme");applyTheme(saved|| (matchMedia("(prefers-color-scheme:dark)").matches?"dark":"light"));}catch(e){}
+tBtn.addEventListener("click",()=>{const next=root.getAttribute("data-theme")==="dark"?"light":"dark";applyTheme(next);try{localStorage.setItem("budget-theme",next);}catch(e){}});
+</script>
+</body>
+</html>
